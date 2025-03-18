@@ -5,7 +5,7 @@ import Image from "next/image";
 import Apreset1 from "../../public/preset1.png";
 import Apreset2 from "../../public/preset2.png";
 import Apreset3 from "../../public/preset3.png";
-import modalImg from "../../public/modlImg.png";
+import modalImg from "../../public/modalimg.png";
 
 interface NavbarProps {
   onDownload: (format: string) => void; // Modify the prop to accept format
@@ -94,6 +94,9 @@ export default function Navbar({ onDownload, onSelectedPreset }: NavbarProps) {
       {modal && (
         <div className={styles.bgDiv}>
           <div className={styles.modalCont}>
+            <button className={styles.closeBtn} onClick={() => setModal(false)}>
+              X
+            </button>
             <Image src={modalImg} alt="modal img" className={styles.modalImg} />
             <p className={styles.text1}>
               Build your marketing games and <br />

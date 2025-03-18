@@ -388,6 +388,7 @@ export default function Sidebar({
             className={styles.ikxBAC}
           />
         </div>
+        <p style={{position:"absolute",bottom:"1rem",color:'#181818'}}>App by <span style={{ color: "#F06127" }}>Klics</span></p>
       </div>
     </div>
   );

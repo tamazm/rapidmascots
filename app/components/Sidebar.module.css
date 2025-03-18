@@ -495,8 +495,8 @@
   width: 10rem;
   background-color: #181818;
   position: absolute;
-  right: 5;
-  top: 5;
+  right: 1rem;
+  top: 0.2rem;
   z-index: 999;
   display: flex;
   flex-direction: column;
@@ -535,6 +535,7 @@
   width: 35rem;
   background-color: #fff;
   display: flex;
+  position: relative;
   align-items: center;
   justify-content: center;
   flex-direction: column;
@@ -575,4 +576,15 @@
   border: none;
   outline: none;
   border-radius: 0.3rem;
+}
+.closeBtn{
+  font-family: 'Roboto Mono', monospace !important;
+  top: 15;
+  right: 15;
+  background-color: transparent;
+  border: none;
+  position: absolute;
+  outline: none;
+  cursor: pointer;
+  color: #181818;
 }
