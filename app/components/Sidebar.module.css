@@ -122,7 +122,6 @@
   font-size: 0.8rem;
 }
 
-
 .MInput { 
   margin: auto;
   -webkit-appearance: none;
@@ -134,7 +133,7 @@
   border-radius: 0; /* iOS */
 }
 
-::-webkit-slider-runnable-track {
+.MInput::-webkit-slider-runnable-track {
   background: #ddd;
 }
 
@@ -143,7 +142,7 @@
 * 2. Shadow is negative the full width of the input and has a spread 
 *    of the width of the input.
 */
-::-webkit-slider-thumb {
+.MInput::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 20px; /* 1 */
   height: 20px;
@@ -152,12 +151,12 @@
   border: 2px solid #999; /* 1 */
 }
 
-::-moz-range-track {
+.MInput::-moz-range-track {
   height: 4px;
   background: #ddd;
 }
 
-::-moz-range-thumb {
+.MInput::-moz-range-thumb {
   background: #fff;
   height: 5px;
   width: 5px; /* 1 */
@@ -167,11 +166,11 @@
   box-sizing: border-box;
 }
 
-::-ms-fill-lower { 
+.MInput::-ms-fill-lower { 
   background: #181818;
 }
 
-::-ms-thumb { 
+.MInput::-ms-thumb { 
   background: #fff;
   border: 2px solid #999; /* 1 */
   height: 4px;
@@ -179,22 +178,22 @@
   box-sizing: border-box;
 }
 
-::-ms-ticks-after { 
+.MInput::-ms-ticks-after { 
   display: none; 
 }
 
-::-ms-ticks-before { 
+.MInput::-ms-ticks-before { 
   display: none; 
 }
 
-::-ms-track { 
+.MInput::-ms-track { 
   background: #ddd;
   color: transparent;
   height: 40px;
   border: none;
 }
 
-::-ms-tooltip { 
+.MInput::-ms-tooltip { 
   display: none;
 }
 
