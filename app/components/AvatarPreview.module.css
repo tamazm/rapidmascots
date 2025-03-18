@@ -1,0 +1,33 @@
+.avatarPreview {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: url("../../public/bg.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.part {
+  height: auto;
+  position: absolute;
+  transition: all 0.5s;
+  aspect-ratio: 1/1.2;
+}
+.part:hover{
+  cursor: pointer;
+  outline: 4px dashed #fff;
+  border-radius: 0.2rem;
+}
+.avatarCanvas {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
