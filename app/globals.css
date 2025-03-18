@@ -3,6 +3,15 @@
   --foreground: #171717;
 }
 
+@font-face {
+  font-family: "pkmn";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://assets.codepen.io/13471/Pokemon-DPPt.woff2") format("woff2"),
+    url("https://assets.codepen.io/13471/pokemon-DPPt.woff") format("woff");
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -33,6 +42,50 @@ body {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+:root {
+  /* vars */
+  --h: 252;
+  --bg: hsl(var(--canvas), 85%, 22%);
+  --link: hsl(var(--canvas), 70%, 60%);
+  --linkh: hsl(150, 70%, 40%);
+  --spring-easing: linear(
+    0,
+    0.0015 0.4%,
+    0.0093 1%,
+    0.0352,
+    0.0751 3.01%,
+    0.1377 4.21%,
+    0.2811 6.42%,
+    0.7023 12.23%,
+    0.8275 14.24%,
+    0.9232,
+    1.0011,
+    1.0611,
+    1.1039 21.46%,
+    1.1208,
+    1.1333 23.46%,
+    1.1428 24.67%,
+    1.1475,
+    1.1462,
+    1.1402,
+    1.1304,
+    1.1179 31.68%,
+    1.0476 38.3%,
+    1.017 41.71%,
+    1.0032 43.72%,
+    0.9935 45.52%,
+    0.9857,
+    0.9809 49.53%,
+    0.9782 52.34%,
+    0.9793 55.35%,
+    0.9971 67.78%,
+    1.0025 74.8%,
+    1.0031 81.42%,
+    0.9997 99.87%
+  );
+  --spring-duration: 0.9s;
 }
 
 @media (prefers-color-scheme: dark) {

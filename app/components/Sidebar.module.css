@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@600;700&display=swap');
+
 .sidebar {
   width: 25rem;
   height: 100%;
@@ -37,6 +39,7 @@
   height: 2.5rem;
   display: inline-block;
   cursor: pointer;
+  border-radius: 0.5rem;
 }
 
 .uploadInput {
@@ -119,38 +122,80 @@
   font-size: 0.8rem;
 }
 
-.MInput {
-  -webkit-appearance: none; /* Override default CSS styles */
-  appearance: none;
+
+.MInput { 
+  margin: auto;
+  -webkit-appearance: none;
+  position: relative;
+  overflow: hidden;
+  height: 20px;
   width: 100%;
-  height: 0.4rem;
-  background: gray; /* Track background color */
-  outline: none;
-  opacity: 0.7;
-  transition: opacity 0.2s;
-  position: relative; /* Ensure the pseudo-element is positioned correctly */
+  cursor: pointer;
+  border-radius: 0; /* iOS */
 }
 
-/* Thumb styling for WebKit browsers */
-.MInput::-webkit-slider-thumb {
-  -webkit-appearance: none; /* Override default look */
-  appearance: none;
-  width: 15px;
-  height: 15px;
-  background: #181818; /* Thumb color */
-  cursor: pointer;
-  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.5); /* Optional: Add a slight shadow for better visibility */
-  transform: translateY(-4.5px); /* Move thumb up */
+::-webkit-slider-runnable-track {
+  background: #ddd;
 }
 
-/* Track styling for WebKit browsers */
-.MInput::-webkit-slider-runnable-track {
-  width: 100%;
-  height: 0.4rem;
-  cursor: pointer;
-  background: #181818; /* Track background color */
-  border-radius: 1px;
-  position: relative; /* Ensure the pseudo-element is positioned correctly */
+/*
+* 1. Set to 0 width and remove border for a slider without a thumb
+* 2. Shadow is negative the full width of the input and has a spread 
+*    of the width of the input.
+*/
+::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px; /* 1 */
+  height: 20px;
+  background: #fff;
+  box-shadow: -200px 0 0 200px #181818; /* 2 */
+  border: 2px solid #999; /* 1 */
+}
+
+::-moz-range-track {
+  height: 4px;
+  background: #ddd;
+}
+
+::-moz-range-thumb {
+  background: #fff;
+  height: 5px;
+  width: 5px; /* 1 */
+  border: 3px solid #999; /* 1 */
+  border-radius: 0 !important;
+  box-shadow: -200px 0 0 200px #181818;
+  box-sizing: border-box;
+}
+
+::-ms-fill-lower { 
+  background: #181818;
+}
+
+::-ms-thumb { 
+  background: #fff;
+  border: 2px solid #999; /* 1 */
+  height: 4px;
+  width: 2px; /* 1 */
+  box-sizing: border-box;
+}
+
+::-ms-ticks-after { 
+  display: none; 
+}
+
+::-ms-ticks-before { 
+  display: none; 
+}
+
+::-ms-track { 
+  background: #ddd;
+  color: transparent;
+  height: 40px;
+  border: none;
+}
+
+::-ms-tooltip { 
+  display: none;
 }
 
 .MInputDiv {
@@ -248,4 +293,287 @@
 
 .checkboxwrapper2 .ikxBAC:checked:hover {
   background-color: #F06127;
+}
+
+.select{
+  background-color: transparent;
+  outline: none;
+
+}
+.btn {
+  font-family: "pkmn", sans-serif;
+  text-transform: none;
+  display: inline-flex;
+  padding: 0.5em;
+  border-radius: 1em;
+  box-shadow: inset 0 0px 0px 0.5px rgba(0, 0, 0, 0.2),
+    rgba(0, 0, 0, 0.03) 0px 0.25em 0.3em -1px,
+    rgba(0, 0, 0, 0.02) 0px 0.15em 0.25em -1px;
+  position: relative;
+  background: transparent;
+  outline: none;
+  border: none;
+  transform: scale(1);
+  z-index: 1;
+  cursor: pointer;
+}
+
+.btn span {
+  background: #3a3a3a;
+  background-image: linear-gradient(#434343, #2a2a2a);
+  padding: 1em 1.5em;
+  font-size: 0.9rem;
+  border-radius: 0.5em;
+  position: relative;
+  isolation: isolate;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 0.25em 0.3em -1px,
+    rgba(0, 0, 0, 0.12) 0px 0.15em 0.25em -1px;
+  z-index: 1;
+}
+.btn span::before {
+  content: "";
+  position: absolute;
+  inset: 0.5em 0.75em;
+  background-image: linear-gradient(#2e2e2e, #474747);
+  border-radius: 4em;
+  z-index: -1;
+}
+
+.btn:hover {
+  opacity: 1;
+}
+.btn:focus,
+.btn.active {
+  border-color: white;
+}
+.btn:active,
+.btn.active {
+  transform: scale(0.975);
+}
+.btn,
+.btn:focus:not(:active) {
+  transition: transform var(--spring-duration) var(--spring-easing),
+    border 0.6s ease-out, box-shadow 0.3s ease-out, background 0.3s ease-out;
+}
+.btn:active,
+.btn.active {
+  transition: transform 0.05s ease-out, border 0.6s ease-out,
+    box-shadow 0.3s ease-out, background 0.3s ease-out;
+}
+
+.btn::before {
+  content: "";
+  position: absolute;
+  inset: 0em;
+  background-image: conic-gradient(
+    from var(--mask) at 50% 50%,
+    #22ffff 0%,
+    #3c64ff 11%,
+    #c03afc 22%,
+    #ff54e8 33%,
+    #ff5959 44%,
+    #ff9a07ff 55%,
+    #feff07ff 66%,
+    #58ff07ff 77%,
+    #07ff77ff 88%,
+    #22ffff 100%
+  );
+  filter: blur(0.5em);
+  z-index: -2;
+  opacity: 0.4;
+  scale: 0.96 0.9;
+  border-radius: 0.75em;
+  transition: all 0.25s ease;
+}
+.btn:after {
+  z-index: -1;
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 1px 0px 0px rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0px 0px rgba(255, 255, 255, 0.6);
+  border-radius: 0.875em;
+  transition: all 0.25s ease;
+}
+
+.btn:hover::before,
+.btn:focus::before {
+  opacity: 0.6;
+  scale: 1;
+  filter: blur(1em);
+}
+
+.btn:focus::before,
+.btn.active::before {
+  animation: 2s ease-in-out pulse infinite both;
+}
+
+.btn:hover::after,
+.btn:focus::after,
+.btn.active::after {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(30px);
+  box-shadow: inset 0 1px 0px 0px rgba(255, 255, 255, 0.66),
+    inset 0 -1px 0px 0px rgba(255, 255, 255, 0.5);
+}
+
+@property --mask {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 30deg;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+    scale: 1;
+    --mask: 30deg;
+  }
+  70% {
+    --mask: 390deg;
+  }
+  85% {
+    opacity: 0.4;
+    scale: 0.96 0.9;
+  }
+  100% {
+    --mask: 390deg;
+  }
+}
+
+@font-face {
+  font-family: "pkmn";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://assets.codepen.io/13471/Pokemon-DPPt.woff2") format("woff2"),
+    url("https://assets.codepen.io/13471/pokemon-DPPt.woff") format("woff");
+}
+
+.arrow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  fill: white;
+  color: white;
+  width: 40px;
+  height: 40px;
+  stroke: black;
+  stroke-width: 20;
+  translate: 20px 20px;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.5)) drop-shadow(0 4px 10px rgba(0, 0, 0, 0.25));
+  animation: arrow 3s ease both;
+}
+
+@keyframes arrow {
+  0% {
+    opacity: 0;
+    translate: 90px 60px;
+  }
+  
+  35%, 49% {
+    scale: 1;
+    translate: 20px 20px;
+    opacity: 1;
+  }
+  38% {
+    scale: 0.75;
+    translate: 22px 22px;
+  }
+  73% {
+    translate: 28px 10px;
+    opacity: 1;
+  }
+  100% {
+    translate: 60px -90px;
+    opacity: 0;
+  }
+}
+.dropdownMenu{
+  width: 10rem;
+  background-color: #181818;
+  position: absolute;
+  right: 5;
+  top: 5;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+}
+.option{
+  width: 100%;
+  height: 3rem;
+  background-color: #181818;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s all;
+}
+.option:hover{
+  background-color: #ffff;
+  color: #181818;
+}
+.bgDiv{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  position: absolute;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+}
+.modalCont{
+  width: 35rem;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem 3rem;
+  border-radius: 0.5rem;
+}
+.modalImg{
+  width: 20rem;
+  height: 10rem;
+}
+
+
+.text1 {
+  color: #181818;
+  font-size: 1rem;
+  font-size: 1.4rem;
+  text-align: center;
+  font-family: 'Roboto Mono', monospace !important;
+}
+
+.text2{
+  color: #181818;
+  font-size: 1rem;
+  font-size: 0.8rem;
+  font-weight: 400;
+  text-align: center;
+  font-family: 'Roboto Mono', monospace !important;
+}
+
+.linkBtn{
+  width: 100%;
+  height: 3.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  font-family: 'Roboto Mono', monospace !important;
+  background-color: #F06127;
+  border: none;
+  outline: none;
+  border-radius: 0.3rem;
 }
