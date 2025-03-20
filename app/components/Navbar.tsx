@@ -6,6 +6,7 @@ import Apreset1 from "../../public/preset1.png";
 import Apreset2 from "../../public/preset2.png";
 import Apreset3 from "../../public/preset3.png";
 import modalImg from "../../public/modalimg.png";
+import fillerImg from "../../public/fillerimg.png";
 
 interface NavbarProps {
   onDownload: (format: string) => void; // Modify the prop to accept format
@@ -33,7 +34,6 @@ export default function Navbar({ onDownload, onSelectedPreset }: NavbarProps) {
     <div className={styles.NavbarMain}>
       <div className={styles.headerDiv}>
         <Image src={logo} alt="logo" className={styles.logo} />
-        RapidMascots
       </div>
       <div className={styles.presetDiv}>
         <p style={{ color: "#181818", fontSize: "0.7rem" }}>Presets</p>
@@ -61,8 +61,12 @@ export default function Navbar({ onDownload, onSelectedPreset }: NavbarProps) {
             onSelectedPreset("preset3");
           }}
         />
+        <Image
+          src={fillerImg}
+          alt="Preset Menu"
+          style={{ width: "2.5rem", height: "2.5rem", cursor: "pointer" }}
+        />
       </div>
-
       <button className={styles.btn} onClick={handleButtonClick}>
         <span>Download</span>
       </button>
@@ -90,7 +94,6 @@ export default function Navbar({ onDownload, onSelectedPreset }: NavbarProps) {
           </div>
         </div>
       )}
-
       {modal && (
         <div className={styles.bgDiv}>
           <div className={styles.modalCont}>
@@ -103,12 +106,17 @@ export default function Navbar({ onDownload, onSelectedPreset }: NavbarProps) {
               <span style={{ color: "#F06127" }}>convert 30% more!</span>
             </p>
             <p className={styles.text2}>
-              We also built <span style={{ color: "#F06127" }}>Klics</span> a gamification platform to <br /> help eCommerce &
-              Retail business build marketing <br /> games that help you convert 30%
-              more. 100+ Marketers <br /> and Enterprise companies love us!
+              We also built <span style={{ color: "#F06127" }}>Klics</span> a
+              gamification platform to <br /> help eCommerce & Retail business
+              build marketing <br /> games that help you convert 30% more. 100+
+              Marketers <br /> and Enterprise companies love us!
             </p>
-            <button className={styles.linkBtn} onClick={handleLink}>Build Your Marketing Game</button>
-            <p className={styles.text2}>App by <span style={{ color: "#F06127" }}>Klics</span></p>
+            <button className={styles.linkBtn} onClick={handleLink}>
+              Build Your Marketing Game
+            </button>
+            <p className={styles.text2}>
+              App by <span style={{ color: "#F06127" }}>Klics</span>
+            </p>
           </div>
         </div>
       )}

@@ -38,6 +38,7 @@ export default function EditorPage() {
   });
 
   const [bgColor, setBgColor] = useState(" ");
+  const [bgImage, setBgImage] = useState<string | ArrayBuffer | null>(null);
 
   const [size, setSizes] = useState({
     head: 150,
@@ -65,10 +66,14 @@ export default function EditorPage() {
   });
 
   const handleUpload = (part: string, src: string | ArrayBuffer | null) => {
-    setImages((prevImages) => ({
-      ...prevImages,
-      [part]: src,
-    }));
+    if (part === "bg") {
+      setBgImage(src);
+    } else {
+      setImages((prevImages) => ({
+        ...prevImages,
+        [part]: src,
+      }));
+    }
   };
 
   const handlePositionChange = (
@@ -111,8 +116,8 @@ export default function EditorPage() {
 
     // Add 240px padding around the avatar if background is included
     const padding = includeBg ? 240 : 50;
-    const canvasWidth = maxX - minX + padding * 2;
-    const canvasHeight = maxY - minY + padding * 2;
+    let canvasWidth = maxX - minX + padding * 2;
+    let canvasHeight = maxY - minY + padding * 2;
 
     const canvas = document.createElement("canvas");
     canvas.width = canvasWidth;
@@ -131,8 +136,22 @@ export default function EditorPage() {
       };
 
       if (includeBg) {
-        ctx.fillStyle = bgColor;
-        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        if (bgImage) {
+          const bgImg = await loadImage(bgImage as string);
+          canvasWidth = bgImg.width;
+          canvasHeight = bgImg.height;
+          canvas.width = canvasWidth;
+          canvas.height = canvasHeight;
+          ctx.drawImage(bgImg, 0, 0, canvasWidth, canvasHeight);
+        } else {
+          canvas.width = canvasWidth;
+          canvas.height = canvasHeight;
+          ctx.fillStyle = bgColor;
+          ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        }
+      } else {
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
       }
 
       const [legsImg, bodyImg, headImg] = await Promise.all([
@@ -329,7 +348,6 @@ export default function EditorPage() {
           heights={height}
           onHeightChange={handleHeightChange}
         />
-
         <AvatarPreview
           images={images}
           positions={positions}
@@ -338,6 +356,7 @@ export default function EditorPage() {
           rotation={rotation}
           bgColor={bgColor}
           height={height}
+          bgImage={bgImage as string || ""}
         />
       </div>
     </div>

@@ -1,6 +1,7 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
 }
 
 @font-face {
@@ -33,11 +34,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
+
 
 a {
   color: inherit;
@@ -46,6 +43,8 @@ a {
 
 :root {
   /* vars */
+  --background: #ffffff;
+  --foreground: #171717;
   --h: 252;
   --bg: hsl(var(--canvas), 85%, 22%);
   --link: hsl(var(--canvas), 70%, 60%);

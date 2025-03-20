@@ -17,6 +17,7 @@ interface AvatarPreviewProps {
   rotation: { head: number; body: number; legs: number };
   bgColor: string;
   height: { head: number; body: number; legs: number };
+  bgImage: string;
 }
 
 export default function AvatarPreview({
@@ -27,11 +28,12 @@ export default function AvatarPreview({
   rotation,
   bgColor,
   height,
+  bgImage,
 }: AvatarPreviewProps) {
   const isDefaultImage = (image: string) => image.includes("default.png");
 
   return (
-    <div className={styles.avatarPreview} style={{ background: bgColor }}>
+    <div className={styles.avatarPreview} style={{ backgroundColor: bgColor, backgroundImage: `url(${bgImage})` }}>
       <div className={styles.avatarCanvas}>
         <img
           src={
