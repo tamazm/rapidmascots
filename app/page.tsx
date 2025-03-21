@@ -1,14 +1,14 @@
-import Link from "next/link";
-import styles from "./page.module.css";
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-  return (
-    <div className={styles.container}>
-      <h1>Welcome to Avatar Builder</h1>
-      <p>Click below to start editing your avatar:</p>
-      <Link href="/editor">
-        <button className={styles.startButton}>Go to Editor</button>
-      </Link>
-    </div>
-  );
+  const router = useRouter();
+
+  useEffect(() => {
+    router.push("/editor");
+  }, [router]);
+
+  return null; // Optionally, you can return a loading spinner or message here
 }

@@ -58,7 +58,9 @@ export default function EditorPage() {
   });
 
   const [positions, setPositions] = useState<{
-    [key: string]: { top: number; left: number };
+    head: { top: number; left: number };
+    body: { top: number; left: number };
+    legs: { top: number; left: number };
   }>({
     head: { top: 150, left: 550 },
     body: { top: 290, left: 545 },
@@ -76,8 +78,10 @@ export default function EditorPage() {
     }
   };
 
+  type Part = "head" | "body" | "legs";
+
   const handlePositionChange = (
-    part: string,
+    part: Part,
     position: { top?: number; left?: number }
   ) => {
     setPositions((prevPositions) => ({
@@ -143,6 +147,7 @@ export default function EditorPage() {
           canvas.width = canvasWidth;
           canvas.height = canvasHeight;
           ctx.drawImage(bgImg, 0, 0, canvasWidth, canvasHeight);
+          console.log("sigrdze sigane", canvasWidth, canvasHeight);
         } else {
           canvas.width = canvasWidth;
           canvas.height = canvasHeight;

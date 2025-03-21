@@ -4,10 +4,7 @@ import * as React from "react";
 
 interface SidebarProps {
   onUpload: (part: string, data: string | ArrayBuffer | null) => void;
-  onPositionChange: (
-    part: string,
-    position: { top: number; left: number }
-  ) => void;
+  onPositionChange: (part: "head" | "body" | "legs", position: { top: number; left: number }) => void;
   onSizeChange: (part: string, size: number) => void;
   selectedPart: string;
   positions: { [key: string]: { top: number; left: number } };
@@ -74,7 +71,7 @@ export default function Sidebar({
 
   const handlePositionChange = (
     event: React.ChangeEvent<HTMLInputElement>,
-    part: string,
+    part: "head" | "body" | "legs",
     axis: string
   ) => {
     const value = event.target.value ? parseInt(event.target.value, 10) : 0;
@@ -158,7 +155,7 @@ export default function Sidebar({
                 <input
                   type="range"
                   min="0"
-                  max="700"
+                  max="5000"
                   value={positions.head.top}
                   onChange={(e) => handlePositionChange(e, "head", "top")}
                   className={styles.MInput}
@@ -167,7 +164,7 @@ export default function Sidebar({
                 <input
                   type="range"
                   min="0"
-                  max="1200"
+                  max="5000"
                   value={positions.head.left}
                   onChange={(e) => handlePositionChange(e, "head", "left")}
                   className={styles.MInput}
@@ -253,7 +250,7 @@ export default function Sidebar({
                 <input
                   type="range"
                   min="0"
-                  max="700"
+                  max="5000"
                   value={positions.body.top}
                   onChange={(e) => handlePositionChange(e, "body", "top")}
                   className={styles.MInput}
@@ -262,7 +259,7 @@ export default function Sidebar({
                 <input
                   type="range"
                   min="0"
-                  max="1200"
+                  max="5000"
                   value={positions.body.left}
                   onChange={(e) => handlePositionChange(e, "body", "left")}
                   className={styles.MInput}
@@ -348,7 +345,7 @@ export default function Sidebar({
                 <input
                   type="range"
                   min="0"
-                  max="700"
+                  max="5000"
                   value={positions.legs.top}
                   onChange={(e) => handlePositionChange(e, "legs", "top")}
                   className={styles.MInput}
@@ -357,7 +354,7 @@ export default function Sidebar({
                 <input
                   type="range"
                   min="0"
-                  max="1200"
+                  max="5000"
                   value={positions.legs.left}
                   onChange={(e) => handlePositionChange(e, "legs", "left")}
                   className={styles.MInput}
