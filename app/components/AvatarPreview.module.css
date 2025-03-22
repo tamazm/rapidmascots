@@ -16,10 +16,13 @@
   transition: all 0.5s;
   aspect-ratio: 1/1.2;
 }
-.part:hover{
+.part:hover {
   cursor: pointer;
-  outline: 4px dashed #fff;
+  outline: 3px dashed white;
+  outline-offset: -1px;
+  filter: drop-shadow(0 0 2px black); /* Adds a black shadow around the element */
   border-radius: 0.2rem;
+  z-index: 30 !important;
 }
 .avatarCanvas {
   display: flex;
