@@ -12,23 +12,23 @@ import DefLegs from "../../public/assets/legs/legs.png";
 import body1 from "../../public/assets/bodies/body1.png";
 import body2 from "../../public/assets/bodies/body2.png";
 import body3 from "../../public/assets/bodies/body3.png";
-// import body4 from "../../public/assets/bodies/body4.png";
-// import body5 from "../../public/assets/bodies/body5.png";
-// import body6 from "../../public/assets/bodies/body6.png";
-// import body7 from "../../public/assets/bodies/body7.png";
+import body4 from "../../public/assets/bodies/body4.png";
+import body5 from "../../public/assets/bodies/body5.png";
+import body6 from "../../public/assets/bodies/body6.png";
+import body7 from "../../public/assets/bodies/body7.png";
 
 import head1 from "../../public/assets/heads/head1.png";
 import head2 from "../../public/assets/heads/head2.png";
 import head3 from "../../public/assets/heads/head3.png";
-// import head4 from "../../public/assets/heads/head4.png";
-// import head5 from "../../public/assets/heads/head5.png";
-// import head6 from "../../public/assets/heads/head6.png";
-// import head7 from "../../public/assets/heads/head7.png";
+import head4 from "../../public/assets/heads/head4.png";
+import head5 from "../../public/assets/heads/head5.png";
+import head6 from "../../public/assets/heads/head6.png";
+import head7 from "../../public/assets/heads/head7.png";
 
 import legs1 from "../../public/assets/legs/legs1.png";
 import legs2 from "../../public/assets/legs/legs2.png";
 import legs3 from "../../public/assets/legs/legs3.png";
-// import legs4 from "../../public/assets/legs/legs4.png";
+import legs4 from "../../public/assets/legs/legs4.png";
 
 export default function EditorPage() {
   const [images, setImages] = useState({
@@ -234,6 +234,7 @@ export default function EditorPage() {
   const handleSelectPart = (part: string) => {
     setSelectedPart(part);
   };
+
   const handleRotationChange = (part: string, rotation: number) => {
     setRotation((prevRotation) => ({
       ...prevRotation,
@@ -327,6 +328,98 @@ export default function EditorPage() {
         legs: { top: 420, left: 570 },
       });
       setBgColor("#2B2B2B");
+    } else if (preset === "random") {
+      // Array of available head images
+      const headOptions = [
+        head1.src, 
+        head2.src, 
+        head3.src, 
+        head4.src, 
+        head5.src, 
+        head6.src, 
+        head7.src
+      ];
+      
+      // Array of all available body images
+      const bodyOptions = [
+        body1.src, 
+        body2.src, 
+        body3.src, 
+        body4.src, 
+        body5.src, 
+        body6.src, 
+        body7.src
+      ];
+      
+      // Array of all available legs images
+      const legsOptions = [
+        legs1.src, 
+        legs2.src, 
+        legs3.src, 
+        legs4.src
+      ];
+
+      // Random color generator
+      const getRandomColor = () => {
+        const letters = "0123456789ABCDEF";
+        let color = "#";
+        for (let i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+      };
+
+      // Random number within range
+      const getRandomNumber = (min: number, max: number) => {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      };
+
+      // Set random images
+      setImages({
+        head: headOptions[Math.floor(Math.random() * headOptions.length)],
+        body: bodyOptions[Math.floor(Math.random() * bodyOptions.length)],
+        legs: legsOptions[Math.floor(Math.random() * legsOptions.length)],
+      });
+
+      // Set random sizes
+      setSizes({
+        head: getRandomNumber(130, 220),
+        body: getRandomNumber(110, 170),
+        legs: getRandomNumber(70, 120),
+      });
+
+      // Set random heights
+      setHeight({
+        head: getRandomNumber(140, 200),
+        body: getRandomNumber(110, 180),
+        legs: getRandomNumber(70, 150),
+      });
+
+      // Set random rotation
+      setRotation({
+        head: getRandomNumber(-15, 15),
+        body: getRandomNumber(-5, 5),
+        legs: getRandomNumber(-5, 5),
+      });
+
+      // Set random positions
+      setPositions({
+        head: {
+          top: getRandomNumber(150, 200),
+          left: getRandomNumber(510, 560),
+        },
+        body: {
+          top: getRandomNumber(290, 330),
+          left: getRandomNumber(535, 575),
+        },
+        legs: {
+          top: getRandomNumber(410, 470),
+          left: getRandomNumber(550, 590),
+        },
+      });
+
+      // Set random background color
+      setBgColor(getRandomColor());
     }
   };
 
@@ -352,6 +445,8 @@ export default function EditorPage() {
           handleIncludeBgChange={handleIncludeBgChange}
           heights={height}
           onHeightChange={handleHeightChange}
+          images={images}
+          onSelectedPreset={handleSelectedPreset}
         />
         <AvatarPreview
           images={images}
@@ -361,7 +456,7 @@ export default function EditorPage() {
           rotation={rotation}
           bgColor={bgColor}
           height={height}
-          bgImage={bgImage as string || ""}
+          bgImage={(bgImage as string) || ""}
         />
       </div>
     </div>

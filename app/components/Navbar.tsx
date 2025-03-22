@@ -64,7 +64,7 @@ export default function Navbar({ onDownload, onSelectedPreset }: NavbarProps) {
         <Image
           src={fillerImg}
           alt="Preset Menu"
-          style={{ width: "2.5rem", height: "2.5rem", cursor: "pointer" }}
+          className={styles.presetImg}
         />
       </div>
       <button className={styles.btn} onClick={handleButtonClick}>
