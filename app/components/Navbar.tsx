@@ -35,6 +35,7 @@ export default function Navbar({ onDownload, onSelectedPreset }: NavbarProps) {
       <div className={styles.headerDiv}>
         <Image src={logo} alt="logo" className={styles.logo} />
       </div>
+
       <div className={styles.presetDiv}>
         <p style={{ color: "#181818", fontSize: "0.7rem" }}>Presets</p>
         <Image
@@ -67,9 +68,11 @@ export default function Navbar({ onDownload, onSelectedPreset }: NavbarProps) {
           className={styles.presetImg}
         />
       </div>
+
       <button className={styles.btn} onClick={handleButtonClick}>
         <span>Download</span>
       </button>
+
       {isOpen && (
         <div className={styles.dropdownMenu}>
           <div
@@ -94,6 +97,7 @@ export default function Navbar({ onDownload, onSelectedPreset }: NavbarProps) {
           </div>
         </div>
       )}
+      
       {modal && (
         <div className={styles.bgDiv}>
           <div className={styles.modalCont}>

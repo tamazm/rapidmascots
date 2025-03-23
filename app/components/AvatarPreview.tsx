@@ -2,7 +2,7 @@ import styles from "./AvatarPreview.module.css";
 import DefHead from "../../public/assets/heads/head.png";
 import DefBody from "../../public/assets/bodies/body.png";
 import DefLegs from "../../public/assets/legs/legs.png";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 interface AvatarPreviewProps {
   images: {
@@ -20,20 +20,23 @@ interface AvatarPreviewProps {
     body: number;
     legs: number;
   };
-  height: {
-    head: number;
-    body: number;
-    legs: number;
-  };
+  onSelectPart: (part: string) => void;
   rotation: {
     head: number;
     body: number;
     legs: number;
   };
   bgColor: string;
+  height: {
+    head: number;
+    body: number;
+    legs: number;
+  };
   bgImage: string;
-  onSelectPart: (part: string) => void;
-}
+  onPositionChange: (
+    part: "head" | "body" | "legs",
+    position: { top: number; left: number }
+  ) => void;}
 
 export default function AvatarPreview({
   images,
@@ -44,51 +47,56 @@ export default function AvatarPreview({
   bgColor,
   height,
   bgImage,
+  onPositionChange,
 }: AvatarPreviewProps) {
   const isDefaultImage = (image: string) => image.includes("default.png");
-  const [canvasDimensions, setCanvasDimensions] = useState({
-    width: 0,
-    height: 0,
-  });
-  const [scaleFactor, setScaleFactor] = useState(1);
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const hasBeenCentered = useRef(false);
+
+  const centerAvatar = useCallback(() => {
+    if (!canvasRef.current || !onPositionChange) return;
+
+    const rect = canvasRef.current.getBoundingClientRect();
+    const centerX = rect.width / 2;
+    const startY = rect.height * 0.2; // Start at 20% from top
+
+    // Center all parts horizontally and stack vertically
+    onPositionChange("head", { top: startY, left: centerX - size.head / 2 });
+
+    onPositionChange("body", {
+      top: startY + height.head * 0.8,
+      left: centerX - size.body / 2,
+    });
+
+    onPositionChange("legs", {
+      top: startY + height.head * 0.8 + height.body * 0.8,
+      left: centerX - size.legs / 2,
+    });
+  }, [canvasRef, onPositionChange, size, height]);
 
   useEffect(() => {
-    if (bgImage) {
-      const img = new Image();
-      img.src = bgImage;
-      img.onload = () => {
-        let canvasWidth = img.width;
-        let canvasHeight = img.height;
+    // Only center if we have the callback and haven't centered yet
+    if (!hasBeenCentered.current) {
+      // Wait a bit to ensure everything is rendered
+      const timer = setTimeout(() => {
+        centerAvatar();
+        hasBeenCentered.current = true;
+      }, 100);
 
-        const maxDimension = 1000; 
-        if (canvasWidth > maxDimension || canvasHeight > maxDimension) {
-          const aspectRatio = canvasWidth / canvasHeight;
-          if (canvasWidth > canvasHeight) {
-            canvasWidth = maxDimension;
-            canvasHeight = maxDimension / aspectRatio;
-          } else {
-            canvasHeight = maxDimension;
-            canvasWidth = maxDimension * aspectRatio;
-          }
-        }
-
-        setCanvasDimensions({ width: canvasWidth, height: canvasHeight });
-        setScaleFactor(img.width / canvasWidth);
-      };
+      return () => clearTimeout(timer);
     }
-  }, [bgImage]);
+  }, [centerAvatar]);
 
   return (
-    <div className={styles.avatarPreview}>
+    <div className={styles.avatarPreview} ref={canvasRef}>
       <div
-        className={styles.avatarCanvas}
+        className={`${styles.avatarCanvas} avatarCanvas`}
         style={{
           backgroundColor: bgColor,
-          backgroundImage: `url(${bgImage})`,
-          width: bgImage ? `${canvasDimensions.width}px` : "100%",
-          height: bgImage ? `${canvasDimensions.height}px` : "100%",
+          backgroundImage: bgImage ? `url(${bgImage})` : "none",
         }}
       >
+        {/* Head */}
         <img
           src={
             images.head && !isDefaultImage(images.head)
@@ -98,15 +106,17 @@ export default function AvatarPreview({
           alt="Head"
           className={styles.part}
           style={{
-            top: bgImage ? positions.head.top / scaleFactor : positions.head.top,
-            left: bgImage ? positions.head.left / scaleFactor : positions.head.left,
+            top: positions.head.top,
+            left: positions.head.left,
             zIndex: 9,
             transform: `rotate(${rotation.head}deg)`,
-            width: bgImage ? size.head / scaleFactor : size.head,
-            height: bgImage ? height.head / scaleFactor : height.head,
+            width: size.head,
+            height: height.head,
           }}
           onClick={() => onSelectPart("head")}
         />
+
+        {/* Body */}
         <img
           src={
             images.body && !isDefaultImage(images.body)
@@ -116,15 +126,17 @@ export default function AvatarPreview({
           alt="Body"
           className={styles.part}
           style={{
-            top: bgImage ? positions.body.top / scaleFactor : positions.body.top,
-            left: bgImage ? positions.body.left / scaleFactor : positions.body.left,
+            top: positions.body.top,
+            left: positions.body.left,
             zIndex: 8,
             transform: `rotate(${rotation.body}deg)`,
-            width: bgImage ? size.body / scaleFactor : size.body,
-            height: bgImage ? height.body / scaleFactor : height.body,
+            width: size.body,
+            height: height.body,
           }}
           onClick={() => onSelectPart("body")}
         />
+
+        {/* Legs */}
         <img
           src={
             images.legs && !isDefaultImage(images.legs)
@@ -134,12 +146,12 @@ export default function AvatarPreview({
           alt="Legs"
           className={styles.part}
           style={{
-            top: bgImage ? positions.legs.top / scaleFactor : positions.legs.top,
-            left: bgImage ? positions.legs.left / scaleFactor : positions.legs.left,
+            top: positions.legs.top,
+            left: positions.legs.left,
             zIndex: 7,
             transform: `rotate(${rotation.legs}deg)`,
-            width: bgImage ? size.legs / scaleFactor : size.legs,
-            height: bgImage ? height.legs / scaleFactor : height.legs,
+            width: size.legs,
+            height: height.legs,
           }}
           onClick={() => onSelectPart("legs")}
         />

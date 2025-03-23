@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useEffect } from "react";
 import styles from "./Sidebar.module.css";
 import { useDropzone } from "react-dropzone";
 import randomImg from "../../public/randomImg.png";
@@ -6,6 +7,7 @@ import Image from "next/image";
 import DefHead from "../../public/assets/heads/head.png";
 import DefBody from "../../public/assets/bodies/body.png";
 import DefLegs from "../../public/assets/legs/legs.png";
+import ColorPicker from "react-pick-color";
 
 interface SidebarProps {
   onUpload: (part: string, data: string | ArrayBuffer | null) => void;
@@ -27,6 +29,8 @@ interface SidebarProps {
   onHeightChange: (part: string, height: number) => void;
   images: { head: string; body: string; legs: string };
   onSelectedPreset: (preset: string) => void;
+  bgImage: string;
+  OriginalCanvasDimensions: { width: number; height: number };
 }
 
 export default function Sidebar({
@@ -46,11 +50,16 @@ export default function Sidebar({
   onHeightChange,
   images,
   onSelectedPreset,
+  bgImage,
+  OriginalCanvasDimensions,
 }: SidebarProps) {
   const [bgBlock, setBgBlock] = React.useState(false);
   const [avatarBlock, setAvatarBlock] = React.useState(true);
   const isDefaultImage = (image: string) => image.includes("default.png");
-
+  const [canvasDimensions, setCanvasDimensions] = React.useState({
+    width: 0,
+    height: 0,
+  });
   const handleFileChange = (
     event: React.ChangeEvent<HTMLInputElement>,
     part: string
@@ -77,8 +86,24 @@ export default function Sidebar({
     }
   };
 
-  const { getRootProps, getInputProps } = useDropzone({
+  // Create separate dropzone configurations for each part
+  const bgDropzone = useDropzone({
     onDrop: (acceptedFiles) => handleDrop(acceptedFiles, "bg"),
+    accept: { "image/*": [] },
+  });
+
+  const headDropzone = useDropzone({
+    onDrop: (acceptedFiles) => handleDrop(acceptedFiles, "head"),
+    accept: { "image/*": [] },
+  });
+
+  const bodyDropzone = useDropzone({
+    onDrop: (acceptedFiles) => handleDrop(acceptedFiles, "body"),
+    accept: { "image/*": [] },
+  });
+
+  const legsDropzone = useDropzone({
+    onDrop: (acceptedFiles) => handleDrop(acceptedFiles, "legs"),
     accept: { "image/*": [] },
   });
 
@@ -118,12 +143,6 @@ export default function Sidebar({
     onRotationChange(part, newRotation);
   };
 
-  const handleLocalBgColorChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    handleBgColorChange(event);
-  };
-
   const handleBgToggle = () => {
     setBgBlock(false);
     setAvatarBlock(true);
@@ -133,6 +152,19 @@ export default function Sidebar({
     setBgBlock(true);
     setAvatarBlock(false);
   };
+
+  useEffect(() => {
+    if (bgImage) {
+      const img = document.createElement("img");
+      img.src = bgImage;
+      img.onload = () => {
+        const canvasWidth = img.width - 100;
+        const canvasHeight = img.height - 100;
+        setCanvasDimensions({ width: canvasWidth, height: canvasHeight });
+      };
+    }
+  }, [bgImage, OriginalCanvasDimensions]);
+
   return (
     <div className={styles.sidebar}>
       <div className={styles.sidebarWrapper}>
@@ -218,8 +250,12 @@ export default function Sidebar({
             {selectedPart === "head" && (
               <>
                 <h1 style={{ color: "#181818" }}>Head</h1>
-                <div {...getRootProps({ className: styles.uploadInput })}>
-                  <input {...getInputProps()} />
+                <div
+                  {...headDropzone.getRootProps({
+                    className: styles.uploadInput,
+                  })}
+                >
+                  <input {...headDropzone.getInputProps()} />
                   <p
                     style={{
                       fontSize: "0.8rem",
@@ -227,7 +263,7 @@ export default function Sidebar({
                       whiteSpace: "nowrap",
                     }}
                   >
-                    Drop your Images here
+                    Drop your Head Image here
                   </p>
                 </div>
                 <input
@@ -242,7 +278,7 @@ export default function Sidebar({
                   <input
                     type="range"
                     min="0"
-                    max="5000"
+                    max={bgImage ? canvasDimensions.height : OriginalCanvasDimensions.height || 700}
                     value={positions.head.top}
                     onChange={(e) => handlePositionChange(e, "head", "top")}
                     className={styles.MInput}
@@ -251,7 +287,7 @@ export default function Sidebar({
                   <input
                     type="range"
                     min="0"
-                    max="5000"
+                    max={bgImage ? canvasDimensions.width : OriginalCanvasDimensions.width || 1200}
                     value={positions.head.left}
                     onChange={(e) => handlePositionChange(e, "head", "left")}
                     className={styles.MInput}
@@ -276,7 +312,7 @@ export default function Sidebar({
                     onChange={(e) => handleSizeChange(e, "head")}
                     className={styles.MInput}
                     min="0"
-                    max="300"
+                    max="1000"
                   />
                 </div>
                 <div className={styles.MetricsDiv}>
@@ -295,7 +331,7 @@ export default function Sidebar({
                   <input
                     type="range"
                     min="0"
-                    max="300"
+                    max="1000"
                     className={styles.MInput}
                     value={heights.head || 0}
                     onChange={(e) => {
@@ -319,10 +355,14 @@ export default function Sidebar({
             {selectedPart === "body" && (
               <>
                 <h1 style={{ color: "#181818" }}>Body</h1>
-                <div {...getRootProps({ className: styles.uploadInput })}>
-                  <input {...getInputProps()} />
+                <div
+                  {...bodyDropzone.getRootProps({
+                    className: styles.uploadInput,
+                  })}
+                >
+                  <input {...bodyDropzone.getInputProps()} />
                   <p style={{ fontSize: "0.8rem", padding: "3rem" }}>
-                    Drop your Images here
+                    Drop your Body Image here
                   </p>
                 </div>
                 <input
@@ -337,7 +377,7 @@ export default function Sidebar({
                   <input
                     type="range"
                     min="0"
-                    max="5000"
+                    max={bgImage ? canvasDimensions.height : OriginalCanvasDimensions.height || 700}
                     value={positions.body.top}
                     onChange={(e) => handlePositionChange(e, "body", "top")}
                     className={styles.MInput}
@@ -346,7 +386,7 @@ export default function Sidebar({
                   <input
                     type="range"
                     min="0"
-                    max="5000"
+                    max={bgImage ? canvasDimensions.width : OriginalCanvasDimensions.width || 1200}
                     value={positions.body.left}
                     onChange={(e) => handlePositionChange(e, "body", "left")}
                     className={styles.MInput}
@@ -414,10 +454,14 @@ export default function Sidebar({
             {selectedPart === "legs" && (
               <>
                 <h1 style={{ color: "#181818" }}>Legs</h1>
-                <div {...getRootProps({ className: styles.uploadInput })}>
-                  <input {...getInputProps()} />
+                <div
+                  {...legsDropzone.getRootProps({
+                    className: styles.uploadInput,
+                  })}
+                >
+                  <input {...legsDropzone.getInputProps()} />
                   <p style={{ fontSize: "0.8rem", padding: "3rem" }}>
-                    Drop your Images here
+                    Drop your Legs Image here
                   </p>
                 </div>
                 <input
@@ -432,7 +476,7 @@ export default function Sidebar({
                   <input
                     type="range"
                     min="0"
-                    max="5000"
+                    max={bgImage ? canvasDimensions.height : OriginalCanvasDimensions.height || 700}
                     value={positions.legs.top}
                     onChange={(e) => handlePositionChange(e, "legs", "top")}
                     className={styles.MInput}
@@ -441,7 +485,7 @@ export default function Sidebar({
                   <input
                     type="range"
                     min="0"
-                    max="5000"
+                    max={bgImage ? canvasDimensions.width : OriginalCanvasDimensions.width || 1200}
                     value={positions.legs.left}
                     onChange={(e) => handlePositionChange(e, "legs", "left")}
                     className={styles.MInput}
@@ -521,10 +565,11 @@ export default function Sidebar({
                 className={styles.ikxBAC}
               />
             </div>
-
             <label style={{ color: "#181818" }}>Background Image</label>
-            <div {...getRootProps({ className: styles.uploadInput })}>
-              <input {...getInputProps()} />
+            <div
+              {...bgDropzone.getRootProps({ className: styles.uploadInput })}
+            >
+              <input {...bgDropzone.getInputProps()} />
               <p
                 style={{
                   fontSize: "0.8rem",
@@ -542,12 +587,19 @@ export default function Sidebar({
               style={{ display: "none" }}
             />
             <label style={{ color: "#181818" }}>Background Color</label>
-            <input
-              type="color"
-              className={styles.ColorInput}
-              value={bgColor}
-              onChange={handleLocalBgColorChange}
-            />
+            <ColorPicker
+              color={bgColor}
+              onChange={(color) => {
+                // Create a synthetic event to match the expected interface
+                const syntheticEvent = {
+                  target: {
+                    value: color.hex,
+                  },
+                } as React.ChangeEvent<HTMLInputElement>;
+
+                handleBgColorChange(syntheticEvent);
+              }}
+            />{" "}
           </div>
         )}
       </div>

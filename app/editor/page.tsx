@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Sidebar from "@/app/components/Sidebar";
+import html2canvas from "html2canvas";
 import AvatarPreview from "@/app/components/AvatarPreview";
 import styles from "./editor.module.css";
 import Navbar from "../components/Navbar";
@@ -39,12 +40,17 @@ export default function EditorPage() {
 
   const [bgColor, setBgColor] = useState(" ");
   const [bgImage, setBgImage] = useState<string | ArrayBuffer | null>(null);
+  const avatarPreviewRef = useRef<HTMLDivElement>(null);
+  const isDefaultImage = (image: string) => image.includes("default.png");
+  const [selectedPart, setSelectedPart] = useState("head"); // State to track selected part
+  const [includeBg, setIncludeBg] = useState(true); // State to track if background should be included
 
   const [size, setSizes] = useState({
     head: 150,
     body: 150,
     legs: 120,
   });
+
   const [height, setHeight] = useState({
     head: 180,
     body: 180,
@@ -90,11 +96,21 @@ export default function EditorPage() {
     }));
   };
 
-  const isDefaultImage = (image: string) => image.includes("default.png");
-  const [selectedPart, setSelectedPart] = useState("head"); // State to track selected part
-  const [includeBg, setIncludeBg] = useState(true); // State to track if background should be included
-
   const handleDownload = async (format: string) => {
+    // Check if background is present
+    const hasBg =
+      (bgImage && bgImage !== "") || (includeBg && bgColor && bgColor !== " ");
+
+    if (hasBg) {
+      // Use screenshot method for background images/colors
+      await takeScreenshotDownload(format);
+    } else {
+      // Use original method for transparent backgrounds
+      await handleOriginalDownload(format);
+    }
+  };
+
+  const handleOriginalDownload = async (format: string) => {
     const headImage =
       images.head && !isDefaultImage(images.head) ? images.head : DefHead.src;
     const bodyImage =
@@ -103,9 +119,27 @@ export default function EditorPage() {
       images.legs && !isDefaultImage(images.legs) ? images.legs : DefLegs.src;
 
     const parts = [
-      { image: headImage, position: positions.head, size: size.head },
-      { image: bodyImage, position: positions.body, size: size.body },
-      { image: legsImage, position: positions.legs, size: size.legs },
+      {
+        image: headImage,
+        position: positions.head,
+        size: size.head,
+        height: height.head,
+        rotation: rotation.head,
+      },
+      {
+        image: bodyImage,
+        position: positions.body,
+        size: size.body,
+        height: height.body,
+        rotation: rotation.body,
+      },
+      {
+        image: legsImage,
+        position: positions.legs,
+        size: size.legs,
+        height: height.legs,
+        rotation: rotation.legs,
+      },
     ];
 
     // Calculate the bounding box of the avatar parts
@@ -115,13 +149,13 @@ export default function EditorPage() {
       ...parts.map((part) => part.position.left + part.size)
     );
     const maxY = Math.max(
-      ...parts.map((part) => part.position.top + part.size)
+      ...parts.map((part) => part.position.top + part.height || part.size)
     );
 
-    // Add 240px padding around the avatar if background is included
-    const padding = includeBg ? 240 : 50;
-    let canvasWidth = maxX - minX + padding * 2;
-    let canvasHeight = maxY - minY + padding * 2;
+    // Use smaller padding for transparent background
+    const padding = 50;
+    const canvasWidth = maxX - minX + padding * 2;
+    const canvasHeight = maxY - minY + padding * 2;
 
     const canvas = document.createElement("canvas");
     canvas.width = canvasWidth;
@@ -139,64 +173,126 @@ export default function EditorPage() {
         });
       };
 
-      if (includeBg) {
-        if (bgImage) {
-          const bgImg = await loadImage(bgImage as string);
-          canvasWidth = bgImg.width;
-          canvasHeight = bgImg.height;
-          canvas.width = canvasWidth;
-          canvas.height = canvasHeight;
-          ctx.drawImage(bgImg, 0, 0, canvasWidth, canvasHeight);
-          console.log("sigrdze sigane", canvasWidth, canvasHeight);
-        } else {
-          canvas.width = canvasWidth;
-          canvas.height = canvasHeight;
-          ctx.fillStyle = bgColor;
-          ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-        }
-      } else {
-        canvas.width = canvasWidth;
-        canvas.height = canvasHeight;
-      }
-
+      // Load all images
       const [legsImg, bodyImg, headImg] = await Promise.all([
         loadImage(legsImage),
         loadImage(bodyImage),
         loadImage(headImage),
       ]);
 
-      ctx.drawImage(
+      // Function to draw rotated images
+      const drawRotatedImage = (
+        ctx: CanvasRenderingContext2D,
+        image: HTMLImageElement,
+        x: number,
+        y: number,
+        width: number,
+        height: number,
+        degrees: number
+      ) => {
+        ctx.save();
+        ctx.translate(x + width / 2, y + height / 2);
+        ctx.rotate((degrees * Math.PI) / 180);
+        ctx.drawImage(image, -width / 2, -height / 2, width, height);
+        ctx.restore();
+      };
+
+      // Draw parts with rotation
+      // Draw legs
+      drawRotatedImage(
+        ctx,
         legsImg,
         positions.legs.left - minX + padding,
         positions.legs.top - minY + padding,
         size.legs,
-        height.legs
+        height.legs,
+        rotation.legs
       );
-      ctx.drawImage(
+
+      // Draw body
+      drawRotatedImage(
+        ctx,
         bodyImg,
         positions.body.left - minX + padding,
         positions.body.top - minY + padding,
         size.body,
-        height.body
+        height.body,
+        rotation.body
       );
-      ctx.drawImage(
+
+      // Draw head
+      drawRotatedImage(
+        ctx,
         headImg,
         positions.head.left - minX + padding,
         positions.head.top - minY + padding,
         size.head,
-        height.head
+        height.head,
+        rotation.head
       );
 
+      // Download the image
       if (format === "png") {
         const link = document.createElement("a");
         link.download = "avatar.png";
-        link.href = canvas.toDataURL();
+        link.href = canvas.toDataURL("image/png");
         link.click();
       } else if (format === "svg") {
-        const pngDataUrl = canvas.toDataURL();
+        const pngDataUrl = canvas.toDataURL("image/png");
         const svgString = `
-          <svg xmlns="http://www.w3.org/2000/svg" width="${canvasWidth}" height="${canvasHeight}">
-            <image href="${pngDataUrl}" width="${canvasWidth}" height="${canvasHeight}" />
+        <svg xmlns="http://www.w3.org/2000/svg" width="${canvasWidth}" height="${canvasHeight}">
+          <image href="${pngDataUrl}" width="${canvasWidth}" height="${canvasHeight}" />
+        </svg>
+      `;
+        const svgBlob = new Blob([svgString], {
+          type: "image/svg+xml;charset=utf-8",
+        });
+        const url = URL.createObjectURL(svgBlob);
+
+        const link = document.createElement("a");
+        link.download = "avatar.svg";
+        link.href = url;
+        link.click();
+      }
+    }
+  };
+
+  const takeScreenshotDownload = async (format: string) => {
+    if (!avatarPreviewRef.current) {
+      console.error("Avatar preview ref not found");
+      return handleOriginalDownload(format); // Fallback
+    }
+
+    try {
+      // Find the canvas element
+      const canvasElement =
+        avatarPreviewRef.current.querySelector(".avatarCanvas");
+
+      if (!canvasElement) {
+        console.error("Canvas element not found");
+        return handleOriginalDownload(format); // Fallback
+      }
+
+      // Take the screenshot
+      const canvas = await html2canvas(canvasElement as HTMLElement, {
+        scale: 2, // Better quality
+        useCORS: true,
+        allowTaint: true,
+        logging: false, // Disable logging for production
+      });
+
+      // Download the image
+      if (format === "png") {
+        const link = document.createElement("a");
+        link.download = "avatar.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      } else if (format === "svg") {
+        // Convert PNG to SVG
+        const pngDataUrl = canvas.toDataURL("image/png");
+        const svgString = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="${canvas.width}" height="${canvas.height}">
+            <image href="${pngDataUrl}" width="${canvas.width}" height="${canvas.height}" />
           </svg>
         `;
         const svgBlob = new Blob([svgString], {
@@ -209,6 +305,10 @@ export default function EditorPage() {
         link.href = url;
         link.click();
       }
+    } catch (error) {
+      console.error("Error taking screenshot:", error);
+      // Fall back to original method if screenshot fails
+      await handleOriginalDownload(format);
     }
   };
 
@@ -224,6 +324,7 @@ export default function EditorPage() {
       [part]: newSize,
     }));
   };
+
   const handleHeightChange = (part: string, newHeight: number) => {
     setHeight((prevHeight) => ({
       ...prevHeight,
@@ -263,11 +364,6 @@ export default function EditorPage() {
         body: 170,
         legs: 90,
       });
-      setPositions({
-        head: { top: 170, left: 540 },
-        body: { top: 310, left: 545 },
-        legs: { top: 465, left: 575 },
-      });
       setRotation({
         head: 0,
         body: 0,
@@ -289,11 +385,6 @@ export default function EditorPage() {
         head: 200,
         body: 160,
         legs: 70,
-      });
-      setPositions({
-        head: { top: 190, left: 530 },
-        body: { top: 335, left: 565 },
-        legs: { top: 470, left: 590 },
       });
       setRotation({
         head: 0,
@@ -322,42 +413,32 @@ export default function EditorPage() {
         body: 0,
         legs: 0,
       });
-      setPositions({
-        head: { top: 165, left: 535 },
-        body: { top: 310, left: 550 },
-        legs: { top: 420, left: 570 },
-      });
       setBgColor("#2B2B2B");
     } else if (preset === "random") {
       // Array of available head images
       const headOptions = [
-        head1.src, 
-        head2.src, 
-        head3.src, 
-        head4.src, 
-        head5.src, 
-        head6.src, 
-        head7.src
+        head1.src,
+        head2.src,
+        head3.src,
+        head4.src,
+        head5.src,
+        head6.src,
+        head7.src,
       ];
-      
+
       // Array of all available body images
       const bodyOptions = [
-        body1.src, 
-        body2.src, 
-        body3.src, 
-        body4.src, 
-        body5.src, 
-        body6.src, 
-        body7.src
+        body1.src,
+        body2.src,
+        body3.src,
+        body4.src,
+        body5.src,
+        body6.src,
+        body7.src,
       ];
-      
+
       // Array of all available legs images
-      const legsOptions = [
-        legs1.src, 
-        legs2.src, 
-        legs3.src, 
-        legs4.src
-      ];
+      const legsOptions = [legs1.src, legs2.src, legs3.src, legs4.src];
 
       // Random color generator
       const getRandomColor = () => {
@@ -369,55 +450,12 @@ export default function EditorPage() {
         return color;
       };
 
-      // Random number within range
-      const getRandomNumber = (min: number, max: number) => {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-      };
-
       // Set random images
       setImages({
         head: headOptions[Math.floor(Math.random() * headOptions.length)],
         body: bodyOptions[Math.floor(Math.random() * bodyOptions.length)],
         legs: legsOptions[Math.floor(Math.random() * legsOptions.length)],
       });
-
-      // Set random sizes
-      setSizes({
-        head: getRandomNumber(130, 220),
-        body: getRandomNumber(110, 170),
-        legs: getRandomNumber(70, 120),
-      });
-
-      // Set random heights
-      setHeight({
-        head: getRandomNumber(140, 200),
-        body: getRandomNumber(110, 180),
-        legs: getRandomNumber(70, 150),
-      });
-
-      // Set random rotation
-      setRotation({
-        head: getRandomNumber(-15, 15),
-        body: getRandomNumber(-5, 5),
-        legs: getRandomNumber(-5, 5),
-      });
-
-      // Set random positions
-      setPositions({
-        head: {
-          top: getRandomNumber(150, 200),
-          left: getRandomNumber(510, 560),
-        },
-        body: {
-          top: getRandomNumber(290, 330),
-          left: getRandomNumber(535, 575),
-        },
-        legs: {
-          top: getRandomNumber(410, 470),
-          left: getRandomNumber(550, 590),
-        },
-      });
-
       // Set random background color
       setBgColor(getRandomColor());
     }
@@ -446,18 +484,31 @@ export default function EditorPage() {
           heights={height}
           onHeightChange={handleHeightChange}
           images={images}
-          onSelectedPreset={handleSelectedPreset}
-        />
-        <AvatarPreview
-          images={images}
-          positions={positions}
-          size={size}
-          onSelectPart={handleSelectPart}
-          rotation={rotation}
-          bgColor={bgColor}
-          height={height}
           bgImage={(bgImage as string) || ""}
+          onSelectedPreset={handleSelectedPreset}
+          OriginalCanvasDimensions={
+            avatarPreviewRef.current
+              ? {
+                  width: avatarPreviewRef.current.getBoundingClientRect().width,
+                  height:
+                    avatarPreviewRef.current.getBoundingClientRect().height,
+                }
+              : { width: 0, height: 0 }
+          }
         />
+        <div ref={avatarPreviewRef} style={{ width: "100%", height: "100%" }}>
+          <AvatarPreview
+            images={images}
+            positions={positions}
+            size={size}
+            onSelectPart={handleSelectPart}
+            rotation={rotation}
+            bgColor={bgColor}
+            height={height}
+            bgImage={(bgImage as string) || ""}
+            onPositionChange={handlePositionChange}
+          />
+        </div>
       </div>
     </div>
   );
