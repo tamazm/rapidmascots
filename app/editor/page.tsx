@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Sidebar from "@/app/components/Sidebar";
 import html2canvas from "html2canvas";
 import AvatarPreview from "@/app/components/AvatarPreview";
@@ -44,6 +44,19 @@ export default function EditorPage() {
   const isDefaultImage = (image: string) => image.includes("default.png");
   const [selectedPart, setSelectedPart] = useState("head"); // State to track selected part
   const [includeBg, setIncludeBg] = useState(true); // State to track if background should be included
+  const [history, setHistory] = useState<
+    {
+      positions: typeof positions;
+      size: typeof size;
+      height: typeof height;
+      rotation: typeof rotation;
+      images: typeof images;
+      bgColor: string;
+      bgImage: string | ArrayBuffer | null;
+    }[]
+  >([]);
+  const [currentHistoryIndex, setCurrentHistoryIndex] = useState(-1);
+  const maxHistoryLength = 20;
 
   const [size, setSizes] = useState({
     head: 150,
@@ -76,26 +89,128 @@ export default function EditorPage() {
   const handleUpload = (part: string, src: string | ArrayBuffer | null) => {
     if (part === "bg") {
       setBgImage(src);
+      saveToHistory({
+        positions,
+        size,
+        height,
+        rotation,
+        images,
+        bgColor,
+        bgImage: src,
+      });
     } else {
-      setImages((prevImages) => ({
-        ...prevImages,
-        [part]: src,
-      }));
+      setImages((prevImages) => {
+        const newImages = {
+          ...prevImages,
+          [part]: src,
+        };
+
+        saveToHistory({
+          positions,
+          size,
+          height,
+          rotation,
+          images: newImages,
+          bgColor,
+          bgImage,
+        });
+
+        return newImages;
+      });
     }
   };
 
   type Part = "head" | "body" | "legs";
 
+  const saveToHistory = (newState: {
+    positions: typeof positions;
+    size: typeof size;
+    height: typeof height;
+    rotation: typeof rotation;
+    images: typeof images;
+    bgColor: string;
+    bgImage: string | ArrayBuffer | null;
+  }) => {
+    // Truncate forward history if we've gone back and made a change
+    const newHistory = history.slice(0, currentHistoryIndex + 1);
+
+    // Add the new state to history
+    newHistory.push(newState);
+
+    // Limit history length by removing oldest entries
+    if (newHistory.length > maxHistoryLength) {
+      newHistory.shift();
+    }
+
+    // Update history and index
+    setHistory(newHistory);
+    setCurrentHistoryIndex(newHistory.length - 1);
+  };
+
+  // Add this function after saveToHistory
+  const handleUndo = () => {
+    if (currentHistoryIndex > 0) {
+      const newIndex = currentHistoryIndex - 1;
+      const prevState = history[newIndex];
+
+      // Restore previous state
+      setPositions(prevState.positions);
+      setSizes(prevState.size);
+      setHeight(prevState.height);
+      setRotation(prevState.rotation);
+      setImages(prevState.images);
+      setBgColor(prevState.bgColor);
+      setBgImage(prevState.bgImage);
+
+      // Update index
+      setCurrentHistoryIndex(newIndex);
+    }
+  };
+
+  // Add this useEffect near the top of your component
+  useEffect(() => {
+    // Initialize history with initial state
+    const initialState = {
+      positions,
+      size,
+      height,
+      rotation,
+      images,
+      bgColor,
+      bgImage,
+    };
+    setTimeout(() => {
+      setHistory([initialState]);
+      setCurrentHistoryIndex(0);
+    }, 1000);
+  }, []);
+
   const handlePositionChange = (
     part: Part,
     position: { top?: number; left?: number }
   ) => {
-    setPositions((prevPositions) => ({
-      ...prevPositions,
-      [part]: { ...prevPositions[part], ...position },
-    }));
+    setPositions((prevPositions) => {
+      const newPositions = {
+        ...prevPositions,
+        [part]: { ...prevPositions[part], ...position },
+      };
+
+      // Save to history after state update
+      saveToHistory({
+        positions: newPositions,
+        size,
+        height,
+        rotation,
+        images,
+        bgColor,
+        bgImage,
+      });
+
+      return newPositions;
+    });
   };
 
+  // Empty dependency array = run once on mount
   const handleDownload = async (format: string) => {
     // Check if background is present
     const hasBg =
@@ -275,7 +390,7 @@ export default function EditorPage() {
 
       // Take the screenshot
       const canvas = await html2canvas(canvasElement as HTMLElement, {
-        scale: 2, // Better quality
+        scale: 1, // Better quality
         useCORS: true,
         allowTaint: true,
         logging: false, // Disable logging for production
@@ -319,32 +434,85 @@ export default function EditorPage() {
   };
 
   const handleSizeChange = (part: string, newSize: number) => {
-    setSizes((prevSizes) => ({
-      ...prevSizes,
-      [part]: newSize,
-    }));
+    setSizes((prevSizes) => {
+      const newSizes = {
+        ...prevSizes,
+        [part]: newSize,
+      };
+
+      saveToHistory({
+        positions,
+        size: newSizes,
+        height,
+        rotation,
+        images,
+        bgColor,
+        bgImage,
+      });
+
+      return newSizes;
+    });
   };
 
   const handleHeightChange = (part: string, newHeight: number) => {
-    setHeight((prevHeight) => ({
-      ...prevHeight,
-      [part]: newHeight,
-    }));
+    setHeight((prevHeight) => {
+      const newHeights = {
+        ...prevHeight,
+        [part]: newHeight,
+      };
+
+      saveToHistory({
+        positions,
+        size,
+        height: newHeights,
+        rotation,
+        images,
+        bgColor,
+        bgImage,
+      });
+
+      return newHeights;
+    });
   };
 
   const handleSelectPart = (part: string) => {
     setSelectedPart(part);
   };
 
-  const handleRotationChange = (part: string, rotation: number) => {
-    setRotation((prevRotation) => ({
-      ...prevRotation,
-      [part]: rotation,
-    }));
+  const handleRotationChange = (part: string, newRotation: number) => {
+    setRotation((prevRotation) => {
+      const newRotations = {
+        ...prevRotation,
+        [part]: newRotation,
+      };
+
+      saveToHistory({
+        positions,
+        size,
+        height,
+        rotation: newRotations,
+        images,
+        bgColor,
+        bgImage,
+      });
+
+      return newRotations;
+    });
   };
 
   const handleBgColorChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setBgColor(event.target.value);
+    const newColor = event.target.value;
+    setBgColor(newColor);
+
+    saveToHistory({
+      positions,
+      size,
+      height,
+      rotation,
+      images,
+      bgColor: newColor,
+      bgImage,
+    });
   };
 
   const handleSelectedPreset = (preset: string) => {
@@ -466,6 +634,8 @@ export default function EditorPage() {
       <Navbar
         onDownload={handleDownload}
         onSelectedPreset={handleSelectedPreset}
+        onUndo={handleUndo}
+        canUndo={currentHistoryIndex > 0}
       />
       <div className={styles.SidebarAvatarWrapper}>
         <Sidebar

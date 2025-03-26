@@ -7,13 +7,21 @@ import Apreset2 from "../../public/preset2.png";
 import Apreset3 from "../../public/preset3.png";
 import modalImg from "../../public/modalimg.png";
 import fillerImg from "../../public/fillerimg.png";
+import undoArrow from "../../public/undoArrow.png";
 
 interface NavbarProps {
   onDownload: (format: string) => void; // Modify the prop to accept format
   onSelectedPreset: (preset: string) => void;
+  onUndo?: () => void;
+  canUndo?: boolean;
 }
 
-export default function Navbar({ onDownload, onSelectedPreset }: NavbarProps) {
+export default function Navbar({
+  onDownload,
+  onSelectedPreset,
+  onUndo,
+  canUndo = false,
+}: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [modal, setModal] = useState(false);
 
@@ -37,6 +45,25 @@ export default function Navbar({ onDownload, onSelectedPreset }: NavbarProps) {
       </div>
 
       <div className={styles.presetDiv}>
+        <button
+          onClick={onUndo}
+          disabled={!canUndo}
+          style={{
+            opacity: canUndo ? 1 : 0.5,
+            cursor: canUndo ? "pointer" : "not-allowed",
+            border:'none',
+            outline:'none',
+            background:'none',
+            width:'2rem',
+            height:'2rem',
+          }}
+        >
+          <Image
+            src={undoArrow}
+            alt="undo arrow"
+            style={{ width: "100%", height: "100%" }}
+          />
+        </button>
         <p style={{ color: "#181818", fontSize: "0.7rem" }}>Presets</p>
         <Image
           src={Apreset1}
@@ -62,11 +89,7 @@ export default function Navbar({ onDownload, onSelectedPreset }: NavbarProps) {
             onSelectedPreset("preset3");
           }}
         />
-        <Image
-          src={fillerImg}
-          alt="Preset Menu"
-          className={styles.presetImg}
-        />
+        <Image src={fillerImg} alt="Preset Menu" className={styles.presetImg} />
       </div>
 
       <button className={styles.btn} onClick={handleButtonClick}>
@@ -97,7 +120,7 @@ export default function Navbar({ onDownload, onSelectedPreset }: NavbarProps) {
           </div>
         </div>
       )}
-      
+
       {modal && (
         <div className={styles.bgDiv}>
           <div className={styles.modalCont}>
