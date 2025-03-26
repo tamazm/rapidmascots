@@ -35,8 +35,10 @@ interface AvatarPreviewProps {
   bgImage: string;
   onPositionChange: (
     part: "head" | "body" | "legs",
-    position: { top: number; left: number }
-  ) => void;}
+    position: { top: number; left: number },
+    skipHistory?: boolean
+  ) => void;
+}
 
 export default function AvatarPreview({
   images,
@@ -48,11 +50,13 @@ export default function AvatarPreview({
   height,
   bgImage,
   onPositionChange,
+  
 }: AvatarPreviewProps) {
   const isDefaultImage = (image: string) => image.includes("default.png");
   const canvasRef = useRef<HTMLDivElement>(null);
   const hasBeenCentered = useRef(false);
 
+  // In AvatarPreview.tsx, modify your centerAvatar function:
   const centerAvatar = useCallback(() => {
     if (!canvasRef.current || !onPositionChange) return;
 
@@ -60,19 +64,34 @@ export default function AvatarPreview({
     const centerX = rect.width / 2;
     const startY = rect.height * 0.2; // Start at 20% from top
 
+    // Pass true to skipHistory when centering during initialization
+    const skipHistory = !hasBeenCentered.current;
+
     // Center all parts horizontally and stack vertically
-    onPositionChange("head", { top: startY, left: centerX - size.head / 2 });
+    onPositionChange(
+      "head",
+      { top: startY, left: centerX - size.head / 2 },
+      skipHistory
+    );
 
-    onPositionChange("body", {
-      top: startY + height.head * 0.8,
-      left: centerX - size.body / 2,
-    });
+    onPositionChange(
+      "body",
+      {
+        top: startY + height.head * 0.8,
+        left: centerX - size.body / 2,
+      },
+      skipHistory
+    );
 
-    onPositionChange("legs", {
-      top: startY + height.head * 0.8 + height.body * 0.8,
-      left: centerX - size.legs / 2,
-    });
-  }, [canvasRef, onPositionChange, size, height]);
+    onPositionChange(
+      "legs",
+      {
+        top: startY + height.head * 0.8 + height.body * 0.8,
+        left: centerX - size.legs / 2,
+      },
+      skipHistory
+    );
+  }, [canvasRef, onPositionChange, size, height, hasBeenCentered]);
 
   useEffect(() => {
     // Only center if we have the callback and haven't centered yet

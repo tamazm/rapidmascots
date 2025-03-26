@@ -58,6 +58,9 @@ export default function EditorPage() {
   const [currentHistoryIndex, setCurrentHistoryIndex] = useState(-1);
   const maxHistoryLength = 20;
 
+  // In EditorPage.tsx, add this near your other refs
+  const isInitializing = useRef(true);
+
   const [size, setSizes] = useState({
     head: 150,
     body: 150,
@@ -131,6 +134,12 @@ export default function EditorPage() {
     bgColor: string;
     bgImage: string | ArrayBuffer | null;
   }) => {
+    // Skip saving to history during initialization
+    if (isInitializing.current) {
+      console.log("Skipping history save during initialization");
+      return;
+    }
+
     // Truncate forward history if we've gone back and made a change
     const newHistory = history.slice(0, currentHistoryIndex + 1);
 
@@ -168,26 +177,38 @@ export default function EditorPage() {
   };
 
   // Add this useEffect near the top of your component
+  // Add this useEffect after your initialization useEffect
   useEffect(() => {
-    // Initialize history with initial state
-    const initialState = {
-      positions,
-      size,
-      height,
-      rotation,
-      images,
-      bgColor,
-      bgImage,
-    };
-    setTimeout(() => {
+    // Wait a bit longer than the centerAvatar delay
+    const initTimer = setTimeout(() => {
+      // Save initial state properly after centering is complete
+      const initialState = {
+        positions,
+        size,
+        height,
+        rotation,
+        images,
+        bgColor,
+        bgImage,
+      };
+
+      // Replace the history instead of adding to it
       setHistory([initialState]);
       setCurrentHistoryIndex(0);
-    }, 1000);
-  }, []);
 
+      // Mark initialization as complete
+      isInitializing.current = false;
+      console.log("Initialization complete, history tracking enabled");
+    }, 500); // Wait 500ms (longer than the 100ms in centerAvatar)
+
+    return () => clearTimeout(initTimer);
+  }, []); // Empty dependency array = run once on mount
+
+  // In EditorPage.tsx
   const handlePositionChange = (
     part: Part,
-    position: { top?: number; left?: number }
+    position: { top?: number; left?: number },
+    skipHistory = false // Add this parameter
   ) => {
     setPositions((prevPositions) => {
       const newPositions = {
@@ -195,16 +216,18 @@ export default function EditorPage() {
         [part]: { ...prevPositions[part], ...position },
       };
 
-      // Save to history after state update
-      saveToHistory({
-        positions: newPositions,
-        size,
-        height,
-        rotation,
-        images,
-        bgColor,
-        bgImage,
-      });
+      // Save to history after state update, unless skipped
+      if (!skipHistory) {
+        saveToHistory({
+          positions: newPositions,
+          size,
+          height,
+          rotation,
+          images,
+          bgColor,
+          bgImage,
+        });
+      }
 
       return newPositions;
     });
